@@ -9,6 +9,32 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <local:ColorfulView></local:ColorfulView>
+        <local:ColorfulView x:Name="ColorView" Count="100">
+        </local:ColorfulView>
+        <ComboBox ItemsSource="{x:Bind Colors, Mode=OneWay}" SelectedIndex="0" x:Name="ComboBox1">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="local:Preset">
+                    <GridView IsHitTestVisible="False" Margin="0,4,0,0" Padding="0" SelectionMode="None" IsItemClickEnabled="False" ItemsSource="{x:Bind Source, Mode=OneWay}">
+                        <GridView.ItemContainerStyle>
+                            <Style TargetType="GridViewItem">
+                                <Setter Property="MinWidth" Value="24"/>
+                                <Setter Property="MinHeight" Value="24"></Setter>
+                            </Style>
+                        </GridView.ItemContainerStyle>
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="Color">
+                                <GridViewItem Height="24" Width="24">
+                                    <Ellipse Height="16" Width="16">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{x:Bind}"></SolidColorBrush>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </GridViewItem>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
     </Grid>
 </Page>

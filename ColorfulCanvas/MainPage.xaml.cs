@@ -3,11 +3,14 @@ using CommunityToolkit.WinUI.Animations;
 using CommunityToolkit.WinUI.Media;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml.Linq;
 using Windows.ApplicationModel.Core;
@@ -38,11 +41,124 @@ namespace ColorfulCanvas
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        private CoreApplicationViewTitleBar _coreTitleBar;
+        public ObservableCollection<Preset> Colors = new ObservableCollection<Preset>()
+        {
+            new Preset
+            {
+                Source = new List<Color>()
+                {
+                    Color.FromArgb(255, 0, 144, 150),
+                    Color.FromArgb(255, 17, 179, 171),
+                    Color.FromArgb(255, 127, 193, 184),
+                    Color.FromArgb(255, 224, 244, 233)
+                }
+            },
+            new Preset
+            {
+                Source = new List<Color>()
+                {
+                    Color.FromArgb(255, 25, 13, 121),
+                    Color.FromArgb(255, 93, 32, 156),
+                    Color.FromArgb(255, 143, 87, 187),
+                    Color.FromArgb(255, 231, 108, 222)
+                }
+            },
+            new Preset
+            {
+                Source = new List<Color>()
+                {
+                    Color.FromArgb(255, 2, 63, 138),
+                    Color.FromArgb(255, 0, 151, 200),
+                    Color.FromArgb(255, 0, 181, 215),
+                    Color.FromArgb(255, 70, 202, 229)
+                }
+            },
+            new Preset
+            {
+                Source = new List<Color>()
+                {
+                    Color.FromArgb(255, 26, 78, 118),
+                    Color.FromArgb(255, 28, 117, 161),
+                    Color.FromArgb(255, 53, 160, 163),
+                    Color.FromArgb(255, 120, 201, 145)
+                }
+            }
+        };
+        private Preset selectedPreset;
+        private List<Color> source;
+
+        public List<Color> Source
+        {
+            get
+            {
+                return source ?? Colors.First().Source;
+            }
+            set
+            {
+                if (source != value)
+                {
+                    source = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public Preset SelectedPreset
+        {
+            get
+            {
+                if (selectedPreset != null)
+                {
+                    return selectedPreset;
+                }
+                else
+                {
+                    return Colors.First();
+                }
+            }
+            set
+            {
+                if (value != selectedPreset)
+                {
+                    selectedPreset = value;
+                    this.Source = value.Source;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
         public MainPage()
         {
-            this.InitializeComponent();
+            this.InitializeComponent(); 
+            _coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
+            _coreTitleBar.ExtendViewIntoTitleBar = false;
+            this.Loaded += MainPage_Loaded;
+            //ComboBox1.SelectionChanged += ComboBox1_SelectionChanged;
+        }
+
+        private void MainPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ComboBox1.SelectedItem != null)
+            {
+                ColorView.Source = ((Preset)ComboBox1.SelectedItem).Source;
+            }
+            ComboBox1.SelectionChanged += ComboBox1_SelectionChanged;
+        }
+
+        private void ComboBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ComboBox1.SelectedItem == null)
+            {
+                return;
+            }
+            ColorView.Source = ((Preset)ComboBox1.SelectedItem).Source;
         }
     }
 }

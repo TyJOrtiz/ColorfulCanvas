@@ -25,33 +25,82 @@ using Windows.UI.Xaml.Shapes;
 using Windows.UI;
 using ColorThiefDotNet;
 using Color = Windows.UI.Color;
+using System.Collections.ObjectModel;
+using Windows.UI.Xaml.Markup;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace ColorfulCanvas
 {
-    public sealed partial class ColorfulView : UserControl
+    [ContentProperty(Name = nameof(Colors))]
+    public sealed partial class ColorfulView : UserControl, INotifyPropertyChanged
     {
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            ColorfulView_Loaded(this, null);
+        }
         public ColorfulView()
         {
             this.InitializeComponent();
             this.Loaded += ColorfulView_Loaded;
         }
-        int count = 100;
-        public List<Color> Colors { get; set; } = new List<Color>()
+        private int count = 100;
+        public int Count
         {
+            get
+            {
+                return count;
+            }
+            set
+            {
+                if (count != value)
+                {
+                    count = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        private List<Color> source = new List<Color>();
 
-            Color.FromArgb(255, (byte)(0.9586862922 * 255), (byte)(0.660125792 * 255), (byte)(0.8447988033 * 255)),
-            Color.FromArgb(255, (byte)(0.8714533448 * 255), (byte)(0.723166883 * 255), (byte)(0.9342088699 * 255)),
-            Color.FromArgb(255, (byte)(0.7458761334 * 255), (byte)(0.7851135731 * 255), (byte)(0.9899476171 * 255)),
-            Color.FromArgb(255, (byte)(0.4398113191 * 255), (byte)(0.8953480721 * 255), (byte)(0.9796616435 * 255)),
-            Color.FromArgb(255, (byte)(0.3484552801 * 255), (byte)(0.933657825 * 255), (byte)(0.9058339596 * 255)),
-            Color.FromArgb(255, (byte)(0.5567936897 * 255), (byte)(0.9780793786 * 255), (byte)(0.6893508434 * 255))
-        };
+        public List<Color> Source
+        { get { return source; }
+
+            set
+            {
+                if (value != null && source != value)
+                {
+                    source = value;
+                    Colors = value.ToList();
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        public List<Color> Colors { get; set; } = new List<Color>();
+        //{
+
+        //    Color.FromArgb(255, (byte)(0.9586862922 * 255), (byte)(0.660125792 * 255), (byte)(0.8447988033 * 255)),
+        //    Color.FromArgb(255, (byte)(0.8714533448 * 255), (byte)(0.723166883 * 255), (byte)(0.9342088699 * 255)),
+        //    Color.FromArgb(255, (byte)(0.7458761334 * 255), (byte)(0.7851135731 * 255), (byte)(0.9899476171 * 255)),
+        //    Color.FromArgb(255, (byte)(0.4398113191 * 255), (byte)(0.8953480721 * 255), (byte)(0.9796616435 * 255)),
+        //    Color.FromArgb(255, (byte)(0.3484552801 * 255), (byte)(0.933657825 * 255), (byte)(0.9058339596 * 255)),
+        //    Color.FromArgb(255, (byte)(0.5567936897 * 255), (byte)(0.9780793786 * 255), (byte)(0.6893508434 * 255))
+        //};
+        private List<Storyboard> animations = new List<Storyboard>();
         private void ColorfulView_Loaded(object sender, RoutedEventArgs e)
         {
+            if (Colors == null || !Colors.Any())
+            { return; }
             //this.Background = new SolidColorBrush(Colors[0]);
             Canvas1.Children.Clear();
+            hasher.Clear();
+            foreach (var item in animations)
+            {
+                item.Stop();
+            }
+            animations.Clear();
             var r = new Random();
             while (Colors.Count < count)
             {
@@ -85,7 +134,14 @@ namespace ColorfulCanvas
 
         private void ColorfulView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            if (Colors == null || !Colors.Any())
+            { return; }
             hasher.Clear();
+            foreach (var item in animations)
+            {
+                item.Stop();
+            }
+            animations.Clear();
             Canvas1.Children.Clear();
             var r = new Random();
             while (Colors.Count < count)
@@ -136,8 +192,14 @@ namespace ColorfulCanvas
             Storyboard.SetTargetProperty(animation, "(Ellipse.Fill).(SolidColorBrush.Color)");
             animation.Completed += (a, c) =>
             {
+                animation = null;
+                storyboard.Stop();
+                ellpise.Fill = new SolidColorBrush(color);
+                animations.Remove(storyboard);
+                storyboard = null;
                 GenerateAnimation(item);
             };
+           animations.Add(storyboard);
             storyboard.Begin();
         }
 
@@ -173,12 +235,13 @@ namespace ColorfulCanvas
         }
         public HashSet<(double, double, double)> hasher = new System.Collections.Generic.HashSet<(double, double, double)>();
 
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             ((Grid)sender).Background = new BackdropBlurBrush
             {
-                Amount = 64,
+                Amount = 100,
                 Opacity = 1,
                 FallbackColor = Windows.UI.Colors.Transparent
             };
