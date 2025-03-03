@@ -53,6 +53,7 @@ namespace ColorfulCanvas
         {
             new Preset
             {
+                Name = "Ocean",
                 Source = new List<Color>()
                 {
                     Color.FromArgb(255, 0, 144, 150),
@@ -63,6 +64,7 @@ namespace ColorfulCanvas
             },
             new Preset
             {
+                Name = "Purple",
                 Source = new List<Color>()
                 {
                     Color.FromArgb(255, 25, 13, 121),
@@ -73,6 +75,7 @@ namespace ColorfulCanvas
             },
             new Preset
             {
+                Name = "Blue",
                 Source = new List<Color>()
                 {
                     Color.FromArgb(255, 2, 63, 138),
@@ -83,6 +86,7 @@ namespace ColorfulCanvas
             },
             new Preset
             {
+                Name = "Green",
                 Source = new List<Color>()
                 {
                     Color.FromArgb(255, 26, 78, 118),
@@ -90,8 +94,47 @@ namespace ColorfulCanvas
                     Color.FromArgb(255, 53, 160, 163),
                     Color.FromArgb(255, 120, 201, 145)
                 }
+            },
+            new Preset
+            {
+                Name = "White",
+                Source = new List<Color>()
+                {
+                    make(255, 255, 255),
+                    make(244, 244, 244),
+                    make(233, 233, 233),
+                    make(222, 222, 222),
+                }
+            },
+            new Preset
+            {
+                Name = "Black",
+                Source = new List<Color>()
+                {
+                    make(0, 0, 0),
+                    make(11, 11, 11),
+                    make(22, 22, 22),
+                    make(33, 33, 33),
+                }
+            },
+            new Preset
+            {
+                Name = "Red",
+                Source = new List<Color>()
+                {
+                    Color.FromArgb(255, 121, 19, 31),
+                    Color.FromArgb(255, 164, 44, 39),
+                    Color.FromArgb(255, 207, 89, 58),
+                    Color.FromArgb(255, 176, 65, 61),
+                }
             }
         };
+
+        private static Color make(int v1, int v2, int v3)
+        {
+            return Color.FromArgb(255, (byte)v1, (byte)v2, (byte)v3);
+        }
+
         private Preset selectedPreset;
         private List<Color> source;
 
